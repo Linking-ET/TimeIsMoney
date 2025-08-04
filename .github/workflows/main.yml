@@ -19,6 +19,7 @@ jobs:
     - name: Java 17 setup
       uses: actions/setup-java@v4
       with:
+        distribution: 'adopt'
         java-version: '17'
 
     # 3. Setup local Maven package cache to speed up building
