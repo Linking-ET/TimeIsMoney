@@ -362,22 +362,21 @@ public class Main extends JavaPlugin {
 		}
 
 		if (!finalconfig.getBoolean("allow-multiple-accounts") && !player.hasPermission("tim.multipleaccountsbypass")) {
+    			String playerIp = player.getAddress().getHostString();
 			Set<? extends Player> sameAddressPlayers = Bukkit.getOnlinePlayers().stream()
-					.filter(p -> p.getAddress().getHostString().equals(p.getAddress().getHostString()))
-					.collect(Collectors.toSet());
-			int same_address_count = sameAddressPlayers.size();
-
-			if (same_address_count > finalconfig.getInt("max-multiple-accounts")) {
-				Optional<? extends Player> firstPlayer = sameAddressPlayers.stream().min(Comparator.comparing(Player::getName));
-
-				if (firstPlayer.isPresent()) {
-					// one of the players with multiple ips still should receive a payout
-					if (firstPlayer.get() != player) {
-						sendMessage(player, finalconfig.getString("message_multiple_ips"));
-						return;
-					}
-				}
-			}
+            			.filter(p -> p.getAddress().getHostString().equals(playerIp))
+            			.collect(Collectors.toSet());
+			
+    			int sameAddressCount = sameAddressPlayers.size();
+    			int maxAllowed = finalconfig.getInt("max-multiple-accounts");
+			
+    			if (sameAddressCount > maxAllowed) {
+        			Optional<? extends Player> firstPlayer = sameAddressPlayers.stream().min(Comparator.comparing(Player::getName));
+        			if (firstPlayer.isPresent() && !firstPlayer.get().equals(player)) {
+            				sendMessage(player, finalconfig.getString("message_multiple_ips"));
+            				return;
+        			}
+    			}
 		}
 		
 		//AFK CHECK
