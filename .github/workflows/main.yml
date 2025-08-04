@@ -1,0 +1,39 @@
+name: Compile and test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  compile:
+    name: Maven compiler
+    runs-on: ubuntu-latest
+    steps:
+
+    # 1. Check out the current working tree
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Setup Java 17 JDK (Adopt)
+    - name: Java 17 setup
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+
+    # 3. Setup local Maven package cache to speed up building
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    # 4. Build via Maven 
+    - name: Build via Maven
+      run: mvn verify -B --file pom.xml -DdisableXmlReport=true
+    # 5. Upload JAR 
+    - name: Upload JAR artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: target/*.jar
